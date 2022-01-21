@@ -1,0 +1,63 @@
+------- Lidar Simulator V1.00 INPUT FILE ---------------------------------------
+Configuration of the Leosphere Wind Iris lidar system
+--------------------------------------------------------------------------------
+False	Echo           					- Echo input data to <RootName>.ech (flag)
+100		MAXDLLChainOutputs				- Number of entries in the avrSWAP array reserved for outputs of the LDP DLL
+---------------------- LIDAR CONFIGURATION -------------------------------------
+1		TrajectoryType					- Switch : {0 = cartesian coordinates; 1 = spherical coordinates} [-]
+1       WeightingType					- Switch : {0 = single point; 1 = gaussian distribution; 2 = manual distribution} [-]
+1		LidarPositionX_N				- Position of the lidar coordinate system in the Nacelle coordinate system (X coordinate) [m]
+0		LidarPositionY_N				- Position of the lidar coordinate system in the Nacelle coordinate system (Y coordinate) [m]
+3		LidarPositionZ_N				- Position of the lidar coordinate system in the Nacelle coordinate system (Z coordinate) [m]
+0		RollAngle_N						- Roll angle between the Nacelle and the lidar coordinate system [deg]
+0		PitchAngle_N					- Pitch angle between the Nacelle and the lidar coordinate system [deg]
+180		YawAngle_N						- Yaw angle between the Nacelle and the lidar coordinate system [deg]
+16    	URef							- Mean u-component wind speed at the reference height [m/s]
+1       GatesPerBeam					- Amount of range gates for each los
+0.25	t_measurement_interval			- Time between each measurement [s]
+---------------------- Measuring points in cartesian coordinates----------------
+4		NumberOfPoints_Cartesian		- Amounts of Points
+X-Tab 	Y-Tab 	Z-Tab
+100 		10 		10
+100         10      -10
+100         -10     10
+100         -10     -10 		%%
+---------------------- Measuring points in spherical coordinates----------------
+4		NumberOfPoints_Spherical		- Amounts of Points
+Azimuth-Tab     Elevation-Tab	RangeGates-Tab
+ +15.0 	  +12.5 	   120	 
+ +15.0 	  -12.5 	   120	 
+ -15.0 	  -12.5 	   120		 
+ -15.0 	  +12.5 	   120	   	 
+---------------------- Weighting function (gaussian distribution)---------------
+30		FWHM							- Full width half maximum [m]
+3		PointsToEvaluate				- points evaluated to "integrate" (odd number so there is a point in the peak, >= 3) [-]
+---------------------- Weighting function (manual weighting)--------------------
+0		NumberOfWeightingPoints			- Amount of weighting points
+Distance-Tab	Weighting-Tab
+!0				0				%%
+---------------------- Wind Evolution--------------------
+True		EvolutionFlag                                                                          - Flag whether evolution considered
+".\Wind\ClassA_NTM\Kaimal_URef_16_NTM_Class_A_Seed_1.evo"	Evolving_turbulence_filenameRoot                                         - Rootname of the up-stream full-field wind file to use (.wnd, .sum)
+---------------------- Measurement availability--------------------
+False		AvailabilityFlag                                                                          - Flag whether measurement availability considered
+"LidarDataAvailability.dat"	    Lidar_aiailability_filenameRoot              - Rootname of the lidar availability time series data
+---------------------- Blade Blockage--------------------
+True		BladeBlockageFlag                                                                          - Flag whether blade blockage considered
+---------------------- Output---------------------------------------------------
+OutList      							- The next line(s) contains a list of output parameters.  See OutListParameters.xlsx for a listing of available output channels, (-)
+"XLI"
+"XDTLI"
+"VLOS01LI"
+"BLDBLOCKLI"
+"BEAMIDLI"
+"NEWDATALI"
+END of FAST input file (the word "END" must appear in the first 3 columns of this last line).
+--------------------------------------------------------------------------------
+Everything below this line has existed in this file before writing the OutList above by WriteOutListFst.m on 22-May-2020
+--------------------------------------------------------------------------------
+"XLI"
+"XDTLI"
+"VLOS01LI"
+"BLADEBLOCKLI"
+--------------------------------------------------------------------------------

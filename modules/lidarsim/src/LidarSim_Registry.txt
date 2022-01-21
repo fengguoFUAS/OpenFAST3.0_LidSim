@@ -1,0 +1,114 @@
+include Registry_NWTC_Library.txt
+
+ ..... LidarSim_InitInputType data ........................................................................................................
+typedef LidarSim	LidarSim_InitInputType	CHARACTER(1024)	RootName
+typedef ^			LidarSim_InitInputType	CHARACTER(1024) InputInitFile	-	-	-	"Name of the Input file"
+typedef ^ 			LidarSim_InitInputType	ReKi			DT				-	-	-	"Step size"
+
+ ..... LidarSim_InitOutputType data .......................................................................................................
+typedef	LidarSim	LidarSim_InitOutputType	CHARACTER(ChanLen)	WriteOutputHdr	:   -   -	"Names of output-to-file channels"	-
+typedef	^			LidarSim_InitOutputType	CHARACTER(ChanLen)	WriteOutputUnt	:	-	-	"Units of output-to-file channels"	-
+
+ ..... LidarSim_OutputType data .......................................................................................................
+typedef	LidarSim	LidarSim_OutputType	ReKi	WriteOutput				:   -   -	"Array with values to output to file"	-
+typedef	^			LidarSim_OutputType	ReKi	SwapOutputs				:   -   -	"Array with values to output to avrSwap array"	-
+typedef	^			LidarSim_OutputType	ReKi	AllOutputs				:   -   -	"Array containing all possible outputs"	-
+typedef ^			LidarSim_OutputType	ReKi	IMUOutputs				:	-	-	"Array containing Position, Velocity, and Acceleration of the lidar system"
+
+ ..... LidarSim_ParameterType data .......................................................................................................
+typedef LidarSim	LidarSim_ParameterType	IntKi	MeasurementMaxSteps			-		-	-	"Time steps between lidar measurements" -
+typedef ^			LidarSim_ParameterType	IntKi	MeasurementCurrentStep		-		-	-	"Current amount of time steps after last measurement" -
+typedef ^			LidarSim_ParameterType	IntKi	MeasurementTimeStep		    -		-	-	"Current time steps of lidar measurement" -
+typedef	^			LidarSim_ParameterType	IntKi	LastMeasuringPoint			-		-	-	"Index of last measuring point"	-
+typedef	^			LidarSim_ParameterType	ReKi	LidarPosition_N(3)			-   	-   -	"Lidar position in the nacelle coordinates"	m
+typedef	^			LidarSim_ParameterType	ReKi	LidarOrientation_N(3,3)		-   	-   -	"orientation of the lidar system in the nacelle coordinate system"	-
+typedef	^			LidarSim_ParameterType	ReKi	MeasuringPoints_L			{:}{:}  -   -	"2D Array of all measuringpoints, first dimension is always 3"	m
+typedef ^			LidarSim_ParameterType	ReKi	MeasuringPoints_Spherical_L	{:}{:}	-	-	"2D Array of all measuringpoints, first dimension is always 3 (spherical representation)" deg
+typedef	^			LidarSim_ParameterType	ReKi	WeightingDistance			{:} 	-   -	"Distances to evalute for the weighting"	m
+typedef	^			LidarSim_ParameterType	ReKi	Weighting					{:} 	-   -	"weighting of different positions"	-
+typedef ^			LidarSim_ParameterType	ReKi	URef						-		-	-	"Mean u-component wind speed at the reference height" m/s
+typedef ^   		LidarSim_ParameterType	IntKi	GatesPerBeam				-		-	-	"Amount of gates per point" -
+typedef ^   		LidarSim_ParameterType	IntKi	NextBeamID					-		-	-	"BeamID for the next measurement" -
+typedef ^			LidarSim_ParameterType IntKi	MAXDLLChainOutputs			-		-	-	"Number of entries in the avrSWAP reserved for the DLL chain" -
+typedef ^			LidarSim_ParameterType IntKi	ValidOutputs				{:}		-	-	"List of valid output channels"
+typedef ^           LidarSim_ParameterType  SiKi    FFData                      {:}{:}{:}{:}{:}   -   -   "Array of Bladed style wind data,used to calculate lidar measurement"   
+typedef ^           LidarSim_ParameterType  ReKi    X_unfrozen                  {:}   -   -   "A array contains the unfrozen y-z planes"   
+typedef ^			LidarSim_ParameterType IntKi	Nlongi				        -	  -	  -	  "Bumber of unfrozen y-z planes"
+typedef ^			LidarSim_ParameterType ReKi 	AvaiData				    {:}{:}	  -	  -	  "Array of measurement availability data"
+typedef ^			LidarSim_ParameterType ReKi 	AvaiTimeEnd	                -     0   -     "The total time of the availability data"               seconds
+typedef  ^          ^                       Logical  Periodic                             -  .FALSE.  -   "Flag to indicate if the wind file is periodic"                -
+typedef  ^          ^                       Logical  TowerDataExist    -  .FALSE.  -     "If true, we specified a tower file"                           -
+typedef  ^          ^                       DbKi     DT                -     -     -     "Time step for cont. state integration & disc. state update"   seconds
+typedef  ^          ^                       SiKi     FFTower           :::   -     -     "Array of data along tower, below FF array"                    -
+typedef  ^          ^                       ReKi     FFDTime           -     0     -     "Delta time"                                                   seconds
+typedef  ^          ^                       ReKi     FFRate            -     0     -     "Data rate (1/FFTime)"                                         Hertz
+typedef  ^          ^                       ReKi     FFYHWid           -     0     -     "Half the grid width"                                          meters
+typedef  ^          ^                       ReKi     FFZHWid           -     0     -     "Half the grid height"                                         meters
+typedef  ^          ^                       ReKi     RefHt             -     0     -     "Reference (hub) height of the grid"                           meters
+typedef  ^          ^                       ReKi     GridBase          -     0     -     "the height of the bottom of the grid"                         meters
+typedef  ^          ^                       ReKi     InitXPosition     -     0     -     "the initial x position of grid (distance in FF is offset)"    meters
+typedef  ^          ^                       ReKi     InvFFYD           -     0     -     "reciprocal of delta y"                                        1/meters
+typedef  ^          ^                       ReKi     InvFFZD           -     0     -     "reciprocal of delta z"                                        1/meters
+typedef  ^          ^                       ReKi     InvMFFWS          -     0     -     "reciprocal of mean wind speed (MeanFFWS)"                     seconds/meter
+typedef  ^          ^                       ReKi     MeanFFWS          -     0     -     "Mean wind speed (as defined in FF file), not necessarily of the portion used"  meters/second
+typedef  ^          ^                       ReKi     TotalTime         -     0     -     "The total time of the simulation"                             seconds
+typedef  ^          ^                       IntKi    NFFComp           -     3     -     "Number of wind components"                                    -
+typedef  ^          ^                       IntKi    NFFSteps          -     0     -     "Number of time steps in the FF array"                         -
+typedef  ^          ^                       IntKi    NYGrids           -     0     -     "Number of points in the lateral (y) direction of the grids"   -
+typedef  ^          ^                       IntKi    NZGrids           -     0     -     "Number of points in the vertical (z) direction of the grids"  -
+typedef  ^          ^                       IntKi    NTGrids           -     0     -     "Number of points in the vertical (z) direction on the tower (below the grids)"  -
+typedef  ^          ^                       IntKi    WindFileFormat    -     -     -     "Binary file format description number"                        -
+typedef	 ^	        ^                       LOGICAL	 EvolutionFlag	   -	 -	   -	     "Flag whether evolution considered"	-
+typedef	 ^	        ^                       LOGICAL	 AvailabilityFlag  -	 -	   -	     "Flag whether measurement availability due to CNR considered"	-
+typedef	 ^	        ^                       LOGICAL	 BladeBlockageFlag -	 -	   -	     "Flag whether blade blockage considered"	-
+typedef  ^   		^	                    IntKi	 NBlade			   -	 -	   -	"Number of blades, needed for lidar beam blockage detection" -
+typedef  ^   		^	                    IntKi	 NELM			   -	 -	   -	"Number of blade element, needed for lidar beam blockage detection" -
+typedef	 ^			^                   	ReKi	 BladeELMCL		  {:} 	 -     -	"Chord length of blade element"	-
+typedef  ^   		^	                    IntKi	 AeroynMode			   -	 -	   -	"Aerodyn mode, required to determine blade geometry for blockage detection, 14 or 15" -
+
+
+ ..... LidarSim_InputType data .......................................................................................................
+typedef	LidarSim	LidarSim_InputType	MeshType	NacelleMotion			-	-	-	"."	-
+typedef	LidarSim	LidarSim_InputType	MeshType	HubMotion				-	-	-	"motion on the hub"	-
+typedef	LidarSim	LidarSim_InputType	MeshType	BladeMotion				{:}	-	-	"motion on each blade"	-
+
+ ..... LidarSim_InputFile data .......................................................................................................
+typedef	LidarSim	LidarSim_InputFile LOGICAL	Echo						-	-	-	"Echo input data to <RootName>.ech"	-
+typedef ^			LidarSim_InputFile IntKi	MAXDLLChainOutputs			-	-	-	"Number of entries in the avrSWAP reserved for the DLL chain" -
+typedef	^			LidarSim_InputFile	IntKi	TrajectoryType				-	-	-	"Switch : {0 = cartesian coordinates; 1 = spherical coordinates}"	-
+typedef	^			LidarSim_InputFile	IntKi	WeightingType				-	-	-	"Switch : {0 = single point; 1 = gaussian distribution}"	-
+typedef	^			LidarSim_InputFile	ReKi	LidarPositionX_N			-	-	-	"Units of output-to-file channels"	-
+typedef	^			LidarSim_InputFile	ReKi	LidarPositionY_N			-   -   -	"Names of output-to-file channels"	-
+typedef	^			LidarSim_InputFile	ReKi	LidarPositionZ_N			-	-	-	"Units of output-to-file channels"	-
+typedef	^			LidarSim_InputFile	ReKi	RollAngle_N					-   -   -	"Roll angle between the Nacelle and the lidar coordinate system"	-
+typedef	^			LidarSim_InputFile	ReKi	PitchAngle_N				-	-	-	"Pitch angle between the Nacelle and the lidar coordinate system"	-
+typedef	^			LidarSim_InputFile	ReKi	YawAngle_N					-   -   -	"Yaw angle between the Nacelle and the lidar coordinate system"	-
+typedef ^			LidarSim_InputFile	ReKi	URef						-	-	-	"Mean u-component wind speed at the reference height" m/s
+typedef	^			LidarSim_InputFile	ReKi	t_measurement_interval		-	-	-	"Time between each measurement"	s
+######################			Measuring Points			#############################################
+typedef ^   		LidarSim_InputFile	IntKi	NumberOfPoints_Cartesian	-		-	-	"Amount of Points" -
+typedef ^   		LidarSim_InputFile ReKi	X_Cartesian_L					{:} 	-	-	"X Coordinate (Lidar coordinate system)" m
+typedef ^   		LidarSim_InputFile ReKi	Y_Cartesian_L					{:} 	-	-	"X Coordinate (Lidar coordinate system)" m
+typedef ^   		LidarSim_InputFile ReKi	Z_Cartesian_L					{:} 	-	-	"X Coordinate (Lidar coordinate system)" m
+typedef ^   		LidarSim_InputFile	IntKi	NumberOfPoints_Spherical	-		-	-	"Amount of Points" -
+typedef ^   		LidarSim_InputFile	IntKi	GatesPerBeam				-		-	-	"Amount of gates per point" -
+typedef ^   		LidarSim_InputFile	ReKi	Azimuth						{:}		-	-	"Azimuth Angles " deg
+typedef ^   		LidarSim_InputFile	ReKi	Elevation					{:}		-	-	"Elevation Angles " deg
+typedef ^   		LidarSim_InputFile	ReKi	Range						{:}{:}	-	-	"Range gates " m
+######################			Weighting function Points	  ############################################
+typedef ^   		LidarSim_InputFile	ReKi	FWHM						-	-	-	"Width of half maximum" m
+typedef	^			LidarSim_InputFile	IntKi	PointsToEvaluate			-	-	- 	"points evaluated to "integrate" (odd number so there is a point in the peak)" -
+typedef ^			LidarSim_InputFile IntKi	ManualWeightingPoints		-	-	- 	"Amount of weighting points" -
+typedef ^			LidarSim_InputFile ReKi	ManualWeightingDistance			{:}	-	-	"Manual weighting distances" -
+typedef ^			LidarSim_InputFile ReKi	ManualWeighting					{:}	-	-	"Manual weighting" -
+######################			Wind Evolution	  ############################################
+typedef	^	        LidarSim_InputFile LOGICAL	EvolutionFlag				-	-	-	"Flag whether evolution considered"	-
+typedef ^		    LidarSim_InputFile CHARACTER(1024)	EvolutionFilenameRoot			-	-	-	"Rootname of the up-stream full-field wind file to use (.wnd, .sum)"
+######################			Measurement Availability	  ############################################
+typedef	^	        LidarSim_InputFile LOGICAL	AvailabilityFlag			-	-	-	"Flag whether measurement availability due to CNR considered"	-
+typedef ^		    LidarSim_InputFile CHARACTER(1024)	AvailabilityFilenameRoot			-	-	-	"Rootname of the lidar data availability flag, generated by lidar CNR simulator (.dat)"
+######################			Blade Blockage	  ############################################
+typedef	^	        LidarSim_InputFile LOGICAL	BladeBlockageFlag			-	-	-	"Flag whether blade blockage considered"	-
+######################			Outlist						  ############################################
+typedef ^			LidarSim_InputFile CHARACTER(15)	OutList				{:}	-	-	"User requested Outlist"
+typedef ^			LidarSim_InputFile IntKi			NumOuts				-	-	-	"Number of output parameters"
