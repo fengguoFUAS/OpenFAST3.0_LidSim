@@ -732,13 +732,13 @@ SUBROUTINE FAST_InitializeAll( t_initial, p_FAST, y_FAST, m_FAST, ED, BD, SrvD, 
       END IF
       
       IF ( p_FAST%CompServo == Module_SrvD ) THEN !assign the number of gates to ServD
-         		SRVD%P%GATESPERBEAM  = LidSim%p%GatesPerBeam              
-                SRVD%P%MAXDLLChainOutputs = LidSim%p%MAXDLLChainOutputs
+         		INIT%INDATA_SRVD%GATESPERBEAM = LidSim%p%GatesPerBeam              
+                INIT%INDATA_SRVD%MAXDLLChainOutputs = LidSim%p%MAXDLLChainOutputs
       END IF
    ELSE
       IF ( p_FAST%CompServo == Module_SrvD ) THEN !if lidar not simulated give some default values
-         SRVD%P%GATESPERBEAM = 1
-         SRVD%P%MAXDLLChainOutputs = 100
+         INIT%INDATA_SRVD%GATESPERBEAM = 1
+         INIT%INDATA_SRVD%MAXDLLChainOutputs = 100
       END IF
    END IF 
    

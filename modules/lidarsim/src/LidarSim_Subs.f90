@@ -3300,7 +3300,7 @@ END SUBROUTINE LidarSim_CalculateUVW
     y%AllOutputs( 24 )      = BladeBlockageStatus                                                           !BladeBlockStatus
 
     y%AllOutputs( 25 + LoopGatesPerBeam ) = p%MeasuringPoints_Spherical_L(1,p%LastMeasuringPoint+LoopGatesPerBeam)   !Rangegates
-    y%AllOutputs( 25 + p%GatesPerBeam + LoopGatesPerBeam ) = Vlos + (  DOT_PRODUCT(Dot_LidarPosition_I,UnitVector))  !Output the measured V_los. Consiting of the windspeed and the movement of the measuring system itself
+    y%AllOutputs( 25 + p%GatesPerBeam + LoopGatesPerBeam ) = Vlos + (  DOT_PRODUCT(Dot_LidarPosition_I,UnitVector))  !Output the measured V_los. Consiting of the windspeed and the movement of the measuring system itself note here the LOS towards lidar is positive
     
     DO LoopCounter = 1,SIZE(p%ValidOutputs)
         y%WriteOutput( LoopCounter ) = y%AllOutputs( p%ValidOutputs(LoopCounter) )
@@ -3308,7 +3308,7 @@ END SUBROUTINE LidarSim_CalculateUVW
     
     y%SwapOutputs( 1                        )   = y%AllOutputs( 22 )                                        !NewData
     y%SwapOutputs( 2                        )   = y%AllOutputs( 23 )                                        !BeamID
-    y%SwapOutputs( 3 + LoopGatesPerBeam     )   = y%AllOutputs( 24 + p%GatesPerBeam + LoopGatesPerBeam )    !Vlos
+    y%SwapOutputs( 3 + LoopGatesPerBeam     )   = y%AllOutputs( 25 + p%GatesPerBeam + LoopGatesPerBeam )    !Vlos
 
     y%SwapOutputs( 2 + p%GatesPerBeam   + 1 )   = y%IMUOutputs(  1 )    ! LdrRoll
     y%SwapOutputs( 2 + p%GatesPerBeam   + 2 )   = y%IMUOutputs(  4 )    ! LdrPitch

@@ -869,7 +869,8 @@ END IF
    dll_data%avrSWAP( L + 1 ) = AddOuts%BeamID
    
    !> Gates per beam
-   dll_data%avrSWAP( L + 2 ) = p%GatesPerBeam
+   dll_data%avrSWAP(L + 2 ) = p%GatesPerBeam
+   
    
    !> Line of sight velocities
    DO I = 1,p%GatesPerBeam
@@ -884,6 +885,7 @@ END IF
    dll_data%avrSWAP(L + 2 + p%GatesPerBeam + 5) = AddOuts%LdrYd
    dll_data%avrSWAP(L + 2 + p%GatesPerBeam + 6) = AddOuts%LdrZd   
 
+   
    RETURN
 
 END SUBROUTINE Fill_avrSWAP

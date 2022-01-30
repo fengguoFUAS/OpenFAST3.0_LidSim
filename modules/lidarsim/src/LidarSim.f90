@@ -3,10 +3,10 @@
     USE LidarSim_Types
     USE LidarSim_Subs
     USE NWTC_Library
-    USE InflowWind
-    USE InflowWind_Subs
+    !USE InflowWind
+    !USE InflowWind_Subs
     USE InflowWind_Types
-    USE AeroDyn14_Types
+    !USE AeroDyn14_Types
     
 
     IMPLICIT NONE
