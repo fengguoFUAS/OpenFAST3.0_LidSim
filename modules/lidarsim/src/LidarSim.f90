@@ -132,9 +132,14 @@
     p%LastMeasuringPoint = 1                                                                    !< First measurement point
     p%NextBeamID = 0
     p%MeasurementTimeStep    = 0                                                                ! First time step of lidar measurement
-       
+    
+    
+    
     CALL LidarSim_DestroyInputFile(InputFileData, ErrStat, ErrMsg)                             	! Calls to destory the data from the inputfile. Important data has to be transfered to the parameter data before
 
+    ErrStat = 		TMPERRSTAT
+    ERRMSG	=       TMPERRMSG	                                                                                                                                                                                                                                                  
+    
     END SUBROUTINE LidarSim_Init
 
     !#########################################################################################################################################################################
