@@ -4022,7 +4022,7 @@ END SUBROUTINE LidSim_TS_Bladed_FFWind_CalcOutput
          TGRID = TimeShifted*ParamData%FFRate
          ITLO  = INT( TGRID )             ! convert REAL to INTEGER (add 1 later because our grids start at 1, not 0)
          
-         ITCL  = NINT(TGRID)              ! the closest t index
+         ITCL  = NINT(TGRID) +1             ! the closest t index
          
          
          T     = 2.0_ReKi * ( TGRID - REAL(ITLO, ReKi) ) - 1.0_ReKi     ! a value between -1 and 1 that indicates a relative position between ITLO and ITHI
