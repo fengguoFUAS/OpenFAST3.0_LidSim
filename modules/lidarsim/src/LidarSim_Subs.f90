@@ -4022,7 +4022,7 @@ END SUBROUTINE LidSim_TS_Bladed_FFWind_CalcOutput
          TGRID = TimeShifted*ParamData%FFRate
          ITLO  = INT( TGRID )             ! convert REAL to INTEGER (add 1 later because our grids start at 1, not 0)
          
-         ITCL  = NINT(TGRID) + 1             ! the closest t index
+         ITCL  = NINT(TGRID)              ! the closest t index
          
          
          T     = 2.0_ReKi * ( TGRID - REAL(ITLO, ReKi) ) - 1.0_ReKi     ! a value between -1 and 1 that indicates a relative position between ITLO and ITHI
@@ -4079,7 +4079,7 @@ END SUBROUTINE LidSim_TS_Bladed_FFWind_CalcOutput
          IZHI = IZLO + 1
          
          
-         IZCL = MAX(NINT(ZGRID),1)     ! the closet Z index
+         IZCL = MAX(NINT(ZGRID)+1,1)     ! the closet Z index
          
          
             ! Set Z as a value between -1 and 1 for the relative location between IZLO and IZHI.
@@ -4152,7 +4152,7 @@ END SUBROUTINE LidSim_TS_Bladed_FFWind_CalcOutput
             IYLO = INT( YGRID ) + 1             ! convert REAL to INTEGER, then add one since our grids start at 1, not 0
             IYHI = IYLO + 1
             
-            IYCL = MAX(NINT(YGRID),1)     ! the closet Y index
+            IYCL = MAX(NINT(YGRID)+1,1)     ! the closet Y index
             
             
                ! Set Y as a value between -1 and 1 for the relative location between IYLO and IYHI.  Used in the interpolation.
