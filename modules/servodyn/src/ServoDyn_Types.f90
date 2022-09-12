@@ -139,6 +139,7 @@ IMPLICIT NONE
     REAL(DbKi)  :: DLL_DT      !< interval for calling DLL (must be integer multiple number of DT steps) [s]
     LOGICAL  :: DLL_Ramp      !< whether the DLL pitch should be a ramp (true) or step change (false) when DLL_DT <> DT. If true, introduces a time delay. [-]
     REAL(ReKi)  :: BPCutoff      !< The cutoff frequency for the blade pitch low-pass filter. Large values => no filter. [Hz]
+    REAL(ReKi)  :: InitGenTrq      !< Generator torque at initial state. [Nm]
     REAL(ReKi)  :: NacYaw_North      !< Reference yaw angle of the nacelle when the upwind end points due North [used only with DLL Interface] [radians]
     INTEGER(IntKi)  :: Ptch_Cntrl      !< Record 28: Use individual pitch control {0: collective pitch; 1: individual pitch control} [used only with DLL Interface] [-]
     REAL(ReKi)  :: Ptch_SetPnt      !< Record  5: Below-rated pitch angle set-point [used only with DLL Interface] [radians]
@@ -380,6 +381,7 @@ IMPLICIT NONE
     REAL(ReKi)  :: NacYaw_North      !< Reference yaw angle of the nacelle when the upwind end points due North [rad]
     REAL(ReKi)  :: AvgWindSpeed      !< average wind speed for the simulation [m/s]
     REAL(ReKi)  :: AirDens      !< air density [kg/m^3]
+    REAL(ReKi)  :: InitGenTrq      !< Generator torque at initial state. [Nm]
     INTEGER(IntKi)  :: TrimCase      !< Controller parameter to be trimmed {1:yaw; 2:torque; 3:pitch} [used only if CalcSteady=True] [-]
     REAL(ReKi)  :: TrimGain      !< Proportional gain for the rotational speed error (>0) [used only if TrimCase>0] [rad/(rad/s) for yaw or pitch; Nm/(rad/s) for torque]
     REAL(ReKi)  :: RotSpeedRef      !< Reference rotor speed [rad/s]
@@ -1882,6 +1884,7 @@ ENDIF
     DstInputFileData%DLL_DT = SrcInputFileData%DLL_DT
     DstInputFileData%DLL_Ramp = SrcInputFileData%DLL_Ramp
     DstInputFileData%BPCutoff = SrcInputFileData%BPCutoff
+    DstInputFileData%InitGenTrq = SrcInputFileData%InitGenTrq
     DstInputFileData%NacYaw_North = SrcInputFileData%NacYaw_North
     DstInputFileData%Ptch_Cntrl = SrcInputFileData%Ptch_Cntrl
     DstInputFileData%Ptch_SetPnt = SrcInputFileData%Ptch_SetPnt
@@ -2102,6 +2105,7 @@ ENDIF
       Db_BufSz   = Db_BufSz   + 1  ! DLL_DT
       Int_BufSz  = Int_BufSz  + 1  ! DLL_Ramp
       Re_BufSz   = Re_BufSz   + 1  ! BPCutoff
+      Re_BufSz   = Re_BufSz   + 1  ! InitGenTrq
       Re_BufSz   = Re_BufSz   + 1  ! NacYaw_North
       Int_BufSz  = Int_BufSz  + 1  ! Ptch_Cntrl
       Re_BufSz   = Re_BufSz   + 1  ! Ptch_SetPnt
@@ -2318,6 +2322,8 @@ ENDIF
     IntKiBuf(Int_Xferred) = TRANSFER(InData%DLL_Ramp, IntKiBuf(1))
     Int_Xferred = Int_Xferred + 1
     ReKiBuf(Re_Xferred) = InData%BPCutoff
+    Re_Xferred = Re_Xferred + 1
+    ReKiBuf(Re_Xferred) = InData%InitGenTrq
     Re_Xferred = Re_Xferred + 1
     ReKiBuf(Re_Xferred) = InData%NacYaw_North
     Re_Xferred = Re_Xferred + 1
@@ -2633,6 +2639,8 @@ ENDIF
     OutData%DLL_Ramp = TRANSFER(IntKiBuf(Int_Xferred), OutData%DLL_Ramp)
     Int_Xferred = Int_Xferred + 1
     OutData%BPCutoff = ReKiBuf(Re_Xferred)
+    Re_Xferred = Re_Xferred + 1
+    OutData%InitGenTrq = ReKiBuf(Re_Xferred)
     Re_Xferred = Re_Xferred + 1
     OutData%NacYaw_North = ReKiBuf(Re_Xferred)
     Re_Xferred = Re_Xferred + 1
@@ -7927,6 +7935,7 @@ ENDIF
     DstParamData%NacYaw_North = SrcParamData%NacYaw_North
     DstParamData%AvgWindSpeed = SrcParamData%AvgWindSpeed
     DstParamData%AirDens = SrcParamData%AirDens
+    DstParamData%InitGenTrq = SrcParamData%InitGenTrq
     DstParamData%TrimCase = SrcParamData%TrimCase
     DstParamData%TrimGain = SrcParamData%TrimGain
     DstParamData%RotSpeedRef = SrcParamData%RotSpeedRef
@@ -8230,6 +8239,7 @@ ENDIF
       Re_BufSz   = Re_BufSz   + 1  ! NacYaw_North
       Re_BufSz   = Re_BufSz   + 1  ! AvgWindSpeed
       Re_BufSz   = Re_BufSz   + 1  ! AirDens
+      Re_BufSz   = Re_BufSz   + 1  ! InitGenTrq
       Int_BufSz  = Int_BufSz  + 1  ! TrimCase
       Re_BufSz   = Re_BufSz   + 1  ! TrimGain
       Re_BufSz   = Re_BufSz   + 1  ! RotSpeedRef
@@ -8648,6 +8658,8 @@ ENDIF
     ReKiBuf(Re_Xferred) = InData%AvgWindSpeed
     Re_Xferred = Re_Xferred + 1
     ReKiBuf(Re_Xferred) = InData%AirDens
+    Re_Xferred = Re_Xferred + 1
+    ReKiBuf(Re_Xferred) = InData%InitGenTrq
     Re_Xferred = Re_Xferred + 1
     IntKiBuf(Int_Xferred) = InData%TrimCase
     Int_Xferred = Int_Xferred + 1
@@ -9189,6 +9201,8 @@ ENDIF
     OutData%AvgWindSpeed = ReKiBuf(Re_Xferred)
     Re_Xferred = Re_Xferred + 1
     OutData%AirDens = ReKiBuf(Re_Xferred)
+    Re_Xferred = Re_Xferred + 1
+    OutData%InitGenTrq = ReKiBuf(Re_Xferred)
     Re_Xferred = Re_Xferred + 1
     OutData%TrimCase = IntKiBuf(Int_Xferred)
     Int_Xferred = Int_Xferred + 1

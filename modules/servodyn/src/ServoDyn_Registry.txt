@@ -121,6 +121,7 @@ typedef	^	SrvD_InputFile	CHARACTER(1024)	DLL_InFile	-	-	-	"Name of input file us
 typedef	^	SrvD_InputFile	DbKi	DLL_DT	-	-	-	"interval for calling DLL (must be integer multiple number of DT steps)"	s
 typedef	^	SrvD_InputFile	LOGICAL	DLL_Ramp	-	-	-	"whether the DLL pitch should be a ramp (true) or step change (false) when DLL_DT <> DT. If true, introduces a time delay."	-
 typedef	^	SrvD_InputFile	ReKi	BPCutoff	-	-	-	"The cutoff frequency for the blade pitch low-pass filter. Large values => no filter."	Hz
+typedef ^   SrvD_InputFile  ReKi    InitGenTrq  -   -   -   "Generator torque at initial state." Nm
 typedef	^	SrvD_InputFile	ReKi	NacYaw_North	-	-	-	"Reference yaw angle of the nacelle when the upwind end points due North [used only with DLL Interface]"	radians
 typedef	^	SrvD_InputFile	IntKi	Ptch_Cntrl	-	-	-	"Record 28: Use individual pitch control {0: collective pitch; 1: individual pitch control} [used only with DLL Interface]"	-
 typedef	^	SrvD_InputFile	ReKi	Ptch_SetPnt	-	-	-	"Record  5: Below-rated pitch angle set-point [used only with DLL Interface]"	radians
@@ -361,7 +362,8 @@ typedef	^	ParameterType	IntKi	DLL_n	-	-	-	"number of steps between the controlle
 typedef	^	ParameterType	IntKi	avcOUTNAME_LEN	-	-	-	"Length of the avcOUTNAME character array passed to/from the DLL"	-
 typedef	^	ParameterType	ReKi	NacYaw_North	-	-	-	"Reference yaw angle of the nacelle when the upwind end points due North"	rad
 typedef	^	ParameterType	ReKi	AvgWindSpeed	-	-	-	"average wind speed for the simulation"	m/s
-typedef	^	ParameterType	ReKi	AirDens	-	-	-	"air density"	kg/m^3
+typedef	^	ParameterType	ReKi	AirDens	        -	-	-	"air density"	kg/m^3
+typedef ^   ParameterType   ReKi    InitGenTrq      -   -   -   "Generator torque at initial state." Nm
 # parameters for trim-case (linearization):
 typedef	^	ParameterType	IntKi	TrimCase	-	-	-	"Controller parameter to be trimmed {1:yaw; 2:torque; 3:pitch} [used only if CalcSteady=True]"	-
 typedef	^	ParameterType	ReKi	TrimGain	-	-	-	"Proportional gain for the rotational speed error (>0) [used only if TrimCase>0]"	"rad/(rad/s) for yaw or pitch; Nm/(rad/s) for torque"

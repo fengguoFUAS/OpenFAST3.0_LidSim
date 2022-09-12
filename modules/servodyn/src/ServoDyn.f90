@@ -323,7 +323,7 @@ SUBROUTINE SrvD_Init( InitInp, u, p, x, xd, z, OtherState, y, m,AddOuts,Interval
    u%HorWindV = 0.
    u%YawAngle = 0.
    m%dll_data%ElecPwr_prev = 0.
-   m%dll_data%GenTrq_prev = 0.
+   m%dll_data%GenTrq_prev = p%InitGenTrq  ! Torque initialization
 
       !............................................................................................
       ! Define system output initializations (set up mesh) here:
@@ -2306,6 +2306,7 @@ SUBROUTINE SrvD_SetParameters( InputFileData, p, ErrStat, ErrMsg )
    p%SpdGenOn  = InputFileData%SpdGenOn
    p%TimGenOn  = InputFileData%TimGenOn
    p%TimGenOf  = InputFileData%TimGenOf
+   p%InitGenTrq = InputFileData%InitGenTrq
 
 
    p%THSSBrFl  = InputFileData%THSSBrDp + InputFileData%HSSBrDT   ! Time at which shaft brake is fully deployed

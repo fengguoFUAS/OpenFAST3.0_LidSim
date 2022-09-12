@@ -1271,6 +1271,9 @@ subroutine ParseInputFileInfo( PriPath, InputFile, OutFileRoot, FileInfo_In, Inp
       !  BPCutoff  - Cuttoff frequency for low-pass filter on blade pitch from DLL (Hz) [used only with Bladed Interface]
    call ParseVar( FileInfo_In, CurLine, 'BPCutoff', InputFileData%BPCutoff, ErrStat2, ErrMsg2, UnEcho )
       if (Failed())  return;
+   !  InitGenTrq - Generator torque at initial state (N/m)
+   call ParseVar( FileInfo_In, CurLine, 'InitGenTrq', InputFileData%InitGenTrq, ErrStat2, ErrMsg2, UnEcho )
+      if (Failed()) return;     
       !  NacYaw_North  - Reference yaw angle of the nacelle when the upwind end points due North (deg) [used only with Bladed Interface]
    call ParseVar( FileInfo_In, CurLine, 'NacYaw_North', InputFileData%NacYaw_North, ErrStat2, ErrMsg2, UnEcho )
       if (Failed())  return;
@@ -1319,6 +1322,7 @@ subroutine ParseInputFileInfo( PriPath, InputFile, OutFileRoot, FileInfo_In, Inp
       !  GenPwr_Dem  - Record 13: Demanded power (W) [used only with Bladed Interface]
    call ParseVar( FileInfo_In, CurLine, 'GenPwr_Dem', InputFileData%GenPwr_Dem, ErrStat2, ErrMsg2, UnEcho )
       if (Failed())  return;
+       
 
 
    !---------------------- BLADED INTERFACE TORQUE-SPEED LOOK-UP TABLE -------------         
