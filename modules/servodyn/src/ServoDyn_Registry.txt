@@ -421,6 +421,7 @@ typedef	^	InputType	StC_InputType	SStC	{:}	-	-	"StC module inputs - substructure
 typedef	^	InputType	SiKi	fromSC	{:}	-	-	"A swap array: used to pass turbine specific input data to the DLL controller from the supercontroller"	-
 typedef	^	InputType	SiKi	fromSCglob	{:}	-	-	"A swap array: used to pass global input data to the DLL controller from the supercontroller"	-
 typedef	^	InputType	SiKi	Lidar	{:}	-	-	"A swap array: used to pass input data to the DLL controller from the Lidar"	-
+typedef	^	InputType	ReKi	PltFormPtchRate	-	-	-	"Floating platform pitch rate (speed) rad/s"
 
 # ..... Outputs ...................................................................................................................
 # Define outputs that are contained on the mesh here:

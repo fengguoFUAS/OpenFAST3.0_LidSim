@@ -436,6 +436,7 @@ IMPLICIT NONE
     REAL(SiKi) , DIMENSION(:), ALLOCATABLE  :: fromSC      !< A swap array: used to pass turbine specific input data to the DLL controller from the supercontroller [-]
     REAL(SiKi) , DIMENSION(:), ALLOCATABLE  :: fromSCglob      !< A swap array: used to pass global input data to the DLL controller from the supercontroller [-]
     REAL(SiKi) , DIMENSION(:), ALLOCATABLE  :: Lidar      !< A swap array: used to pass input data to the DLL controller from the Lidar [-]
+    REAL(ReKi)  :: PltFormPtchRate      !< Floating platform pitch rate (speed) rad/s [-]
   END TYPE SrvD_InputType
 ! =======================
 ! =========  SrvD_OutputType  =======
@@ -9612,6 +9613,7 @@ IF (ALLOCATED(SrcInputData%Lidar)) THEN
   END IF
     DstInputData%Lidar = SrcInputData%Lidar
 ENDIF
+    DstInputData%PltFormPtchRate = SrcInputData%PltFormPtchRate
  END SUBROUTINE SrvD_CopyInput
 
  SUBROUTINE SrvD_DestroyInput( InputData, ErrStat, ErrMsg )
@@ -9848,6 +9850,7 @@ ENDIF
     Int_BufSz   = Int_BufSz   + 2*1  ! Lidar upper/lower bounds for each dimension
       Re_BufSz   = Re_BufSz   + SIZE(InData%Lidar)  ! Lidar
   END IF
+      Re_BufSz   = Re_BufSz   + 1  ! PltFormPtchRate
   IF ( Re_BufSz  .GT. 0 ) THEN 
      ALLOCATE( ReKiBuf(  Re_BufSz  ), STAT=ErrStat2 )
      IF (ErrStat2 /= 0) THEN 
@@ -10180,6 +10183,8 @@ ENDIF
         Re_Xferred = Re_Xferred + 1
       END DO
   END IF
+    ReKiBuf(Re_Xferred) = InData%PltFormPtchRate
+    Re_Xferred = Re_Xferred + 1
  END SUBROUTINE SrvD_PackInput
 
  SUBROUTINE SrvD_UnPackInput( ReKiBuf, DbKiBuf, IntKiBuf, Outdata, ErrStat, ErrMsg )
@@ -10593,6 +10598,8 @@ ENDIF
         Re_Xferred = Re_Xferred + 1
       END DO
   END IF
+    OutData%PltFormPtchRate = ReKiBuf(Re_Xferred)
+    Re_Xferred = Re_Xferred + 1
  END SUBROUTINE SrvD_UnPackInput
 
  SUBROUTINE SrvD_CopyOutput( SrcOutputData, DstOutputData, CtrlCode, ErrStat, ErrMsg )
@@ -12057,6 +12064,8 @@ IF (ALLOCATED(u_out%Lidar) .AND. ALLOCATED(u1%Lidar)) THEN
     u_out%Lidar(i1) = u1%Lidar(i1) + b * ScaleFactor
   END DO
 END IF ! check if allocated
+  b = -(u1%PltFormPtchRate - u2%PltFormPtchRate)
+  u_out%PltFormPtchRate = u1%PltFormPtchRate + b * ScaleFactor
  END SUBROUTINE SrvD_Input_ExtrapInterp1
 
 
@@ -12256,6 +12265,9 @@ IF (ALLOCATED(u_out%Lidar) .AND. ALLOCATED(u1%Lidar)) THEN
     u_out%Lidar(i1) = u1%Lidar(i1) + b  + c * t_out
   END DO
 END IF ! check if allocated
+  b = (t(3)**2*(u1%PltFormPtchRate - u2%PltFormPtchRate) + t(2)**2*(-u1%PltFormPtchRate + u3%PltFormPtchRate))* scaleFactor
+  c = ( (t(2)-t(3))*u1%PltFormPtchRate + t(3)*u2%PltFormPtchRate - t(2)*u3%PltFormPtchRate ) * scaleFactor
+  u_out%PltFormPtchRate = u1%PltFormPtchRate + b  + c * t_out
  END SUBROUTINE SrvD_Input_ExtrapInterp2
 
 

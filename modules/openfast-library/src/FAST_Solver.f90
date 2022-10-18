@@ -1093,6 +1093,9 @@ SUBROUTINE SrvD_InputSolve( p_FAST, m_FAST, u_SrvD, y_ED, y_IfW, y_OpFM, y_BD, y
       call Transfer_SD_to_SStC( u_SrvD, y_SD, MeshMapData, ErrStat2, ErrMsg2 )
          call SetErrStat(ErrStat2,ErrMsg2,ErrStat,ErrMsg,RoutineName)
    ENDIF
+   
+   u_SrvD%PltFormPtchRate = y_ED%PLATFORMPTMESH%ROTATIONVEL(2,1)  !PlatForm pitch rate, required for floater damper cocntrol
+
 
 #ifdef SIMULINK_TIMESHIFT   
       ! we're going to use the extrapolated values instead of the old values (Simulink inputs are from t, not t+dt)

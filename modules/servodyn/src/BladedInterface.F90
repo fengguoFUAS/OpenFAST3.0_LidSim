@@ -883,7 +883,10 @@ END IF
    dll_data%avrSWAP(L + 2 + p%GatesPerBeam + 3) = AddOuts%LdrYaw
    dll_data%avrSWAP(L + 2 + p%GatesPerBeam + 4) = AddOuts%LdrXd
    dll_data%avrSWAP(L + 2 + p%GatesPerBeam + 5) = AddOuts%LdrYd
-   dll_data%avrSWAP(L + 2 + p%GatesPerBeam + 6) = AddOuts%LdrZd   
+   dll_data%avrSWAP(L + 2 + p%GatesPerBeam + 6) = AddOuts%LdrZd  
+   
+   !> floating platform pitch rate(speed)
+   dll_data%avrSWAP(L + 2 + p%GatesPerBeam + 7) = u%PltFormPtchRate
 
    
    RETURN
