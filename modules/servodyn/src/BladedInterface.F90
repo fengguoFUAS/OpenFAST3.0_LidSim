@@ -833,7 +833,8 @@ END IF
    dll_data%avrSWAP(83) = u%NcIMURAys                       !> * Record 83: Nacelle nodding acceleration (rad/s^2) [SrvD input]
    dll_data%avrSWAP(84) = u%NcIMURAzs                       !> * Record 84: Nacelle yaw     acceleration (rad/s^2) [SrvD input] -- this is in the shaft (tilted) coordinate system, instead of the nacelle (nontilted) coordinate system
 
-
+!> floating platform pitch rate(speed)
+   dll_data%avrSWAP(85) = u%PltFormPtchRate                 !> * Record 85: floating platform pitch rate(speed), added for floater damper control
 
 ! Records 92-94 are outputs [see Retrieve_avrSWAP()]
 
@@ -885,8 +886,7 @@ END IF
    dll_data%avrSWAP(L + 2 + p%GatesPerBeam + 5) = AddOuts%LdrYd
    dll_data%avrSWAP(L + 2 + p%GatesPerBeam + 6) = AddOuts%LdrZd  
    
-   !> floating platform pitch rate(speed)
-   dll_data%avrSWAP(L + 2 + p%GatesPerBeam + 7) = u%PltFormPtchRate
+   
 
    
    RETURN
