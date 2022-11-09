@@ -714,14 +714,7 @@ SUBROUTINE FAST_InitializeAll( t_initial, p_FAST, y_FAST, m_FAST, ED, BD, SrvD, 
          p_FAST%CompLidar = Module_None
       END IF
       
-      ! FG: deliver constants from aedyDyn, used for blade blockage detection
-      IF ( p_FAST%CompAero == Module_AD14 ) THEN 
-                LIDSIM%P%BladeELMCL=AD14%P%BLADE%C(:)
-
-      ELSEIF ( p_FAST%CompAero == Module_AD ) THEN ! assume the chord length 
-                LIDSIM%P%BladeELMCL=AD%P%ROTORS(1)%BEMT%CHORD(:,1)
-
-      END IF
+      
       
       IF (LIDSIM%P%BLADEBLOCKAGEFLAG==.TRUE.) THEN   !allocate the blade motion if we consider blade blockage
       Allocate( LIDSIM%U%BladeMotion(LIDSIM%P%NBLADE), STAT = ErrStat2 ) !allocate the 
@@ -729,6 +722,17 @@ SUBROUTINE FAST_InitializeAll( t_initial, p_FAST, y_FAST, m_FAST, ED, BD, SrvD, 
           call SetErrStat( ErrID_Fatal, 'Error allocating u%BladeMotion array in lidar module initialization.', ErrStat, ErrMsg, RoutineName )
           return
         End if
+        
+        
+            ! FG: deliver constants from aedyDyn, used for blade blockage detection
+          IF ( p_FAST%CompAero == Module_AD14 ) THEN 
+                    LIDSIM%P%BladeELMCL=AD14%P%BLADE%C(:)
+
+          ELSEIF ( p_FAST%CompAero == Module_AD ) THEN ! assume the chord length 
+                    LIDSIM%P%BladeELMCL=AD%P%ROTORS(1)%BEMT%CHORD(:,1)
+
+          END IF
+      
       END IF
       
       IF ( p_FAST%CompServo == Module_SrvD ) THEN !assign the number of gates to ServD

@@ -66,6 +66,7 @@
     p%LidarPosition_N(3)    =   InputFileData%LidarPositionZ_N
     p%URef                  =   InputFileData%URef
     p%MAXDLLChainOutputs    =   InputFileData%MAXDLLChainOutputs
+    p%SpinnerMountedFlag    =   Inputfiledata%SpinnerMountedFlag
      !p%GatesPerBeam          =   InputFileData%GatesPerBeam   see initialize the measuring points section, if it is Cartesian coordinate it should not have more than one gate
     
    
@@ -175,9 +176,10 @@
     REAL(ReKi)                                                      ::  MeasuringPosition_I(3)      !Transformed Measuring Position
     REAL(ReKi)                                                      ::  LidarPosition_I(3)          !Transformed Lidar Position
     REAL(ReKi)                                                      ::  Vlos                        !Line of sight speed
-    REAL(ReKi)                                                  ::  BladeBlockageStatus         !Status of lidar beam blockage 1 for block, 0 for not
+    REAL(ReKi)                                                      ::  BladeBlockageStatus         !Status of lidar beam blockage 1 for block, 0 for not
     INTEGER(IntKi)                                                  ::  LoopGatesPerBeam            !Counter to loop through all gate points of a line
     INTEGER(IntKi)                                                  ::  LoopCounter
+    
     
     ! Temporary variables for error handling
     INTEGER(IntKi)                                                  ::  TmpErrStat        
@@ -191,13 +193,25 @@
     
     IF(p%MeasurementCurrentStep>=p%MeasurementMaxSteps .OR. p%MeasurementCurrentStep == -1)THEN         !Check if there must be a new measurement     !(NINT(Time*1000)-NINT(p%t_last_measurement*1000)) >= NINT(p%t_measurement_interval*1000)
         p%MeasurementCurrentStep = 0
+        
         LidarPosition_I = LidarSim_TransformLidarToInertial( u%NacelleMotion,p, (/0.0,0.0,0.0/) )                               !Calculation of the lidar positon ( 0 / 0 / 0 ) in the lidar coordinate system
+        
+        IF (p%SpinnerMountedFlag==.True.) THEN
+            LidarPosition_I = LidarSim_TransformLidarToInertial( u%HubMotion,p, (/0.0,0.0,0.0/) )
+        ELSE
+            LidarPosition_I = LidarSim_TransformLidarToInertial( u%NacelleMotion,p, (/0.0,0.0,0.0/) )   
+        END IF
     
         CALL LidarSim_CalculateIMU(p, y, u)                ! Caltulation of Inertial measurement unit
         
-            IF (P%BladeBlockageFlag ==.True.) THEN    ! if consider blade blockage and then we check    
-                MeasuringPosition_I = LidarSim_TransformLidarToInertial(u%NacelleMotion,p,p%MeasuringPoints_L(:,p%LastMeasuringPoint)) ! Calculate the Measuringpoint coordinate in the initial system, here we only need the first measuring point, since all the measuring points are in the same ray (line)
-              
+            IF (P%BladeBlockageFlag ==.True.) THEN    ! if consider blade blockage and then we check   
+                
+                IF (p%SpinnerMountedFlag==.True.) THEN
+                    MeasuringPosition_I = LidarSim_TransformLidarToInertial(u%HubMotion,p,p%MeasuringPoints_L(:,p%LastMeasuringPoint))
+                ELSE 
+                    MeasuringPosition_I = LidarSim_TransformLidarToInertial(u%NacelleMotion,p,p%MeasuringPoints_L(:,p%LastMeasuringPoint)) ! Calculate the Measuringpoint coordinate in the initial system, here we only need the first measuring point, since all the measuring points are in the same ray (line)
+                END IF
+                
                 IF (P%AeroynMode == 14) THEN
                  CALL LidarSim_CheckBladeBlockage_14(p,y,u,LidarPosition_I,MeasuringPosition_I,BladeBlockageStatus)  ! check blockage with AD14
                 ELSEIF  (P%AeroynMode == 15) THEN
@@ -211,7 +225,12 @@
             DO LoopGatesPerBeam = 0,p%GatesPerBeam-1
             
                 !Transform measuring and lidar position to the inertial system
-                MeasuringPosition_I = LidarSim_TransformLidarToInertial(u%NacelleMotion,p,p%MeasuringPoints_L(:,p%LastMeasuringPoint+LoopGatesPerBeam)) ! Calculate the Measuringpoint coordinate in the initial system
+                IF (p%SpinnerMountedFlag==.True.) THEN
+                    MeasuringPosition_I = LidarSim_TransformLidarToInertial(u%HubMotion,p,p%MeasuringPoints_L(:,p%LastMeasuringPoint+LoopGatesPerBeam))
+                ELSE 
+                    MeasuringPosition_I = LidarSim_TransformLidarToInertial(u%NacelleMotion,p,p%MeasuringPoints_L(:,p%LastMeasuringPoint+LoopGatesPerBeam)) ! Calculate the Measuringpoint coordinate in the initial system
+                END IF
+                
     
                 !Line of Sight
                 UnitVector    =   MeasuringPosition_I - LidarPosition_I             !Calculation of the Line of Sight Vector          

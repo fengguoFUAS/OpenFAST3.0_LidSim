@@ -5631,12 +5631,12 @@ SUBROUTINE SolveOption2(this_time, this_state, p_FAST, m_FAST, ED, BD, AD14, AD,
       ! Get the nacelemition from the Elastdyn module 
       LIDSIM%U%nacellemotion = ED%Y%NACELLEMOTION
 
-      ! Get the blade hub geometry from the Elastdyn module, needed for blade blockage detection
+      ! Get the blade hub geometry from the Elastdyn module, needed for blade blockage detection or spinner mounted lidar
       IF ( p_FAST%CompAero == Module_AD14 ) THEN
           LIDSIM%U%HUBMOTION  =   ED%Y%HUBPTMOTION14
           LIDSIM%U%BLADEMOTION  = AD14%INPUT(1)%INPUTMARKERS
           
-          !FG the hub position from the type below is defined at the top-center of the hub
+          !FG the hub position from the type below is defined at the top-center of the hub 
           LIDSIM%U%HUBMOTION%POSITION(:,1)= AD14%INPUT(1)%TURBINECOMPONENTS%HUB%POSITION
           LIDSIM%U%HUBMOTION%ORIENTATION(:,:,1)= AD14%INPUT(1)%TURBINECOMPONENTS%HUB%ORIENTATION
 
