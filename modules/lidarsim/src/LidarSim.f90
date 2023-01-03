@@ -58,6 +58,12 @@
     CALL LidarSim_ReadInputFile(InitInp%InputInitFile,EchoFileName , InputFileData, TmpErrStat, TmpErrMsg)!EchoFileName
     CALL SetErrStat(TmpErrStat,TmpErrMsg,ErrStat,ErrMsg,RoutineName)
     
+	 ! needs to be further improved to show which line is wrong
+    IF (ErrStat >= AbortErrLev) THEN
+        ErrMsg = "error in reading the input file of lidar module. Check the format of the input file!"
+        RETURN
+    END IF
+	
     
     !Transfering InputFileData to the p
     p%MeasurementMaxSteps   =   CEILING(REAL(NINT(InputFileData%t_measurement_interval*100000))/REAL(NINT(InitInp%DT*100000))) !NINT to remove float precision errors. Back to REAL, otherwise the divion ignores everything behind the decima point. Ceiling to round up to next integer
@@ -67,6 +73,7 @@
     p%URef                  =   InputFileData%URef
     p%MAXDLLChainOutputs    =   InputFileData%MAXDLLChainOutputs
     p%SpinnerMountedFlag    =   Inputfiledata%SpinnerMountedFlag
+	p%NearestInterpFlag     =   Inputfiledata%NearestInterpFlag
      !p%GatesPerBeam          =   InputFileData%GatesPerBeam   see initialize the measuring points section, if it is Cartesian coordinate it should not have more than one gate
     
    

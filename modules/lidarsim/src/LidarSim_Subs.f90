@@ -798,14 +798,40 @@
         call cleanup()
         return
     end if
-    call readvar ( unitinput, inputinitfile, inputfiledata%SpinnerMountedFlag, 'SpinnerMountedFlag', 'flag whether blade blockage considered', tmperrstat, tmperrmsg )
+    call readvar ( unitinput, inputinitfile, inputfiledata%SpinnerMountedFlag, 'SpinnerMountedFlag', 'flag whether spinner-mounted considered', tmperrstat, tmperrmsg )
     call seterrstat( tmperrstat, tmperrmsg, errstat, errmsg, routinename )
     if (errstat >= aborterrlev) then
         call cleanup()
         return
     end if
     
+        ! flag whether nearest interpolation should be used
+    call lidarsim_skipcomments(temporaryfileunit, unitinput, tmperrstat, tmperrmsg, unitecho)
+    call seterrstat( tmperrstat, tmperrmsg, errstat, errmsg, routinename )
+    if (errstat >= aborterrlev) then
+        call cleanup()
+        return
+    end if
+    call readcom( unitinput, inputinitfile, 'Nearest Interpolation', tmperrstat, tmperrmsg )
+    call seterrstat( tmperrstat, tmperrmsg, errstat, errmsg, routinename )
+    if (errstat >= aborterrlev) then
+        call cleanup()
+        return
+    end if
     
+    call lidarsim_skipcomments(temporaryfileunit, unitinput, tmperrstat, tmperrmsg, unitecho)
+    call seterrstat( tmperrstat, tmperrmsg, errstat, errmsg, routinename )
+    if (errstat >= aborterrlev) then
+        call cleanup()
+        return
+    end if
+    call readvar ( unitinput, inputinitfile, inputfiledata%NearestInterpFlag, 'NearestInterpFlag', 'Flag to use nearest interpolation. By default, linear interpolation is used.', tmperrstat, tmperrmsg )
+    call seterrstat( tmperrstat, tmperrmsg, errstat, errmsg, routinename )
+    if (errstat >= aborterrlev) then
+        call cleanup()
+        return
+    end if
+	
     ! OutList
     CALL LidarSim_SkipComments(TemporaryFileUnit, UnitInput, TmpErrStat, TmpErrMsg, UnitEcho)
     CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
@@ -3043,10 +3069,12 @@ END SUBROUTINE LidarSim_CalculateUVW
     REAL(ReKi)                                                      ::  DisplacementLidar(3)
     REAL(ReKi)                                                      ::  LidarPosition_I(3)
     
+    !FG: currently, OpenFAST does not write the velocity and acceleration for the hub node, we have to use the velocity and acceleration from the nacelle to calculate the IMU. This should be improved in the future
+    ! However, we can use the rotational angles from the hub mode to determine the measurement position and eular angles for the lidar.
     
     IF (p%SpinnerMountedFlag==.True.) THEN
         
-        Rotation_L_I = MATMUL(TRANSPOSE(u%HubMotion%Orientation(:,:,1)),p%LidarOrientation_N)
+        Rotation_L_I = MATMUL(TRANSPOSE(u%NacelleMotion%Orientation(:,:,1)),p%LidarOrientation_N)
         IF(.NOT.(Rotation_L_I(3,1) == 1 .OR. Rotation_L_I(3,1) == -1)) THEN
             Pitch = -ASIN(Rotation_L_I(3,1))
             Roll = ATAN2(Rotation_L_I(3,2)/cos(Pitch),Rotation_L_I(3,3)/cos(Pitch))
@@ -3062,47 +3090,7 @@ END SUBROUTINE LidarSim_CalculateUVW
             END IF
         END IF
     
-        LidarPosition_I = MATMUL(TRANSPOSE(u%HubMotion%Orientation(:,:,1)),p%LidarPosition_N) !Rotates the position vector to the orientation of the inertial coord. system
-    
-        y%IMUOutputs(1)     = Roll                              !Roll Angle
-        y%IMUOutputs(2)     = u%HubMotion%RotationVel(1,1)  !Roll Angle Velocity
-        y%IMUOutputs(3)     = u%HubMotion%RotationAcc(1,1)  !Roll Angle Acceleration
-        y%IMUOutputs(4)     = Pitch                             !Pitch Angle
-        y%IMUOutputs(5)     = u%HubMotion%RotationVel(2,1)  !Pitch Angle Velocity
-        y%IMUOutputs(6)     = u%HubMotion%RotationAcc(2,1)  !Pitch Angle Acceleration
-        y%IMUOutputs(7)     = Yaw                               !Yaw Angle
-        y%IMUOutputs(8)     = u%HubMotion%RotationVel(3,1)  !Yaw Angle Velocity
-        y%IMUOutputs(9)     = u%HubMotion%RotationAcc(3,1)  !Yaw Angle Acceleration
-    
-        y%IMUOutputs(10)    = u%HubMotion%TranslationDisp(1,1)  !Displacement x 
-        y%IMUOutputs(13)    = u%HubMotion%TranslationDisp(2,1)  !Displacement y
-        y%IMUOutputs(16)    = u%HubMotion%TranslationDisp(3,1)  !Displacement z
-    
-        DisplacementNacelle(1) = u%HubMotion%TranslationDisp(1,1)
-        DisplacementNacelle(2) = u%HubMotion%TranslationDisp(2,1)
-        DisplacementNacelle(3) = u%HubMotion%TranslationDisp(3,1)
-    
-        DisplacementLidar   = LidarPosition_I + DisplacementNacelle
-    
-        y%IMUOutputs(10)    = DisplacementLidar(1)
-        y%IMUOutputs(13)    = DisplacementLidar(2)
-        y%IMUOutputs(16)    = DisplacementLidar(3)
-    
-        CrossProduct(1)     = u%HubMotion%RotationVel(2,1)*LidarPosition_I(3) - u%HubMotion%RotationVel(3,1)*LidarPosition_I(2)
-        CrossProduct(2)     = u%HubMotion%RotationVel(3,1)*LidarPosition_I(1) - u%HubMotion%RotationVel(1,1)*LidarPosition_I(3)
-        CrossProduct(3)     = u%HubMotion%RotationVel(1,1)*LidarPosition_I(2) - u%HubMotion%RotationVel(2,1)*LidarPosition_I(1)
-    
-        y%IMUOutputs(11)    = u%HubMotion%TranslationVel(1,1) + CrossProduct(1)    !Velocity x
-        y%IMUOutputs(14)    = u%HubMotion%TranslationVel(2,1) + CrossProduct(2)    !Velocity y
-        y%IMUOutputs(17)    = u%HubMotion%TranslationVel(3,1) + CrossProduct(3)    !Velocity z
-    
-        CrossProduct(1)     = u%HubMotion%RotationAcc(2,1)*LidarPosition_I(3) - u%HubMotion%RotationAcc(3,1)*LidarPosition_I(2)
-        CrossProduct(2)     = u%HubMotion%RotationAcc(3,1)*LidarPosition_I(1) - u%HubMotion%RotationAcc(1,1)*LidarPosition_I(3)
-        CrossProduct(3)     = u%HubMotion%RotationAcc(1,1)*LidarPosition_I(2) - u%HubMotion%RotationAcc(2,1)*LidarPosition_I(1)    
-    
-        y%IMUOutputs(12)    = u%HubMotion%TranslationAcc(1,1) + CrossProduct(1)     !Acceleration x
-        y%IMUOutputs(15)    = u%HubMotion%TranslationAcc(2,1) + CrossProduct(2)     !Acceleration y
-        y%IMUOutputs(18)    = u%HubMotion%TranslationAcc(3,1) + CrossProduct(3)     !Acceleration z
+		LidarPosition_I = MATMUL(TRANSPOSE(u%NacelleMotion%Orientation(:,:,1)),p%LidarPosition_N) !Rotates the position vector to the orientation of the inertial coord. system
     
     ELSE
         Rotation_L_I = MATMUL(TRANSPOSE(u%NacelleMotion%Orientation(:,:,1)),p%LidarOrientation_N)
@@ -3123,6 +3111,9 @@ END SUBROUTINE LidarSim_CalculateUVW
     
         LidarPosition_I = MATMUL(TRANSPOSE(u%NacelleMotion%Orientation(:,:,1)),p%LidarPosition_N) !Rotates the position vector to the orientation of the inertial coord. system
     
+	END IF
+	
+	
         y%IMUOutputs(1)     = Roll                              !Roll Angle
         y%IMUOutputs(2)     = u%NacelleMotion%RotationVel(1,1)  !Roll Angle Velocity
         y%IMUOutputs(3)     = u%NacelleMotion%RotationAcc(1,1)  !Roll Angle Acceleration
@@ -3162,7 +3153,7 @@ END SUBROUTINE LidarSim_CalculateUVW
         y%IMUOutputs(12)    = u%NacelleMotion%TranslationAcc(1,1) + CrossProduct(1)     !Acceleration x
         y%IMUOutputs(15)    = u%NacelleMotion%TranslationAcc(2,1) + CrossProduct(2)     !Acceleration y
         y%IMUOutputs(18)    = u%NacelleMotion%TranslationAcc(3,1) + CrossProduct(3)     !Acceleration z
-    END IF
+    
 
     END SUBROUTINE LidarSim_CalculateIMU
     
@@ -4032,7 +4023,7 @@ END SUBROUTINE LidSim_TS_Bladed_FFWind_CalcOutput
       REAL(ReKi)                                            :: M(4)           ! array for holding scaling factors for the interpolation algorithm
       REAL(ReKi)                                            :: v(4)           ! array for holding the corner values for the interpolation algorithm across an area
 
-      
+      REAL(DbKi)                                            :: TimeToCalculate           !< time (s)
       
       
       INTEGER(IntKi)                                        :: IDIM
@@ -4059,6 +4050,8 @@ END SUBROUTINE LidSim_TS_Bladed_FFWind_CalcOutput
       ErrStat              = ErrID_None
       ErrMsg               = ""
       
+      
+      TimeToCalculate      = Time
       !-------------------------------------------------------------------------------------------------
       ! Find the bounding time slices.
       !-------------------------------------------------------------------------------------------------
@@ -4079,15 +4072,31 @@ END SUBROUTINE LidSim_TS_Bladed_FFWind_CalcOutput
       IXCL = INT(MINLOC(IXIND,1))
       
       
+      ! Check if the field is periodic and we have enough time length
       
+      IF (TimeToCalculate > PARAMDATA%TOTALTIME) THEN
+          
+          IF (PARAMDATA%PERIODIC==.True.) THEN
+              !write (*,*) 'Turbulence time boundary is violated, the field is read periodically to simulate lidar measurement.'
+                  Do while (TimeToCalculate > PARAMDATA%TOTALTIME) 
+                    TimeToCalculate = TimeToCalculate- PARAMDATA%TOTALTIME
+                  end do
+              
+            ELSE 
+         
+            ErrMsg   = ' Turbulence wind array boundaries violated. Turbulence Grid too small in time dimension '// &
+                       '(time (t='//TRIM(Num2LStr(Time))//' m) is longer than the turbulence field, the lidar measurement can not be calculated). Extend the field or use periodic field.'
+            ErrStat  = ErrID_Fatal
       
+            ENDIF
+     ENDIF 
       
       ! Perform the time shift.  At time=0, a point half the grid width downstream (ParamData%FFYHWid) will index into the zero time slice.
       ! If we did not do this, any point downstream of the tower at the beginning of the run would index outside of the array.
       ! This all assumes the grid width is at least as large as the rotor.  If it isn't, then the interpolation will not work.
 
       
-      TimeShifted = TIME + ( ParamData%InitXPosition - Position(1) )*ParamData%InvMFFWS    ! in distance, X: InputInfo%Position(1) - ParamData%InitXPosition - TIME*ParamData%MeanFFWS
+      TimeShifted = TimeToCalculate + ( ParamData%InitXPosition - Position(1) )*ParamData%InvMFFWS    ! in distance, X: InputInfo%Position(1) - ParamData%InitXPosition - TIME*ParamData%MeanFFWS
 
 
       IF ( ParamData%Periodic ) THEN ! translate TimeShifted to ( 0 <= TimeShifted < ParamData%TotalTime )
@@ -4259,38 +4268,38 @@ END SUBROUTINE LidSim_TS_Bladed_FFWind_CalcOutput
 
          DO IDIM=1,ParamData%NFFComp       ! all the components
 
+            IF (ParamData%NearestInterpFlag==.True.) THEN
 
-!New Algorithm here,   the code below uses 3d linear interpolation
-            !N(1)  = ( 1.0_ReKi + Z )*( 1.0_ReKi - Y )*( 1.0_ReKi - T )
-            !N(2)  = ( 1.0_ReKi + Z )*( 1.0_ReKi + Y )*( 1.0_ReKi - T )
-            !N(3)  = ( 1.0_ReKi - Z )*( 1.0_ReKi + Y )*( 1.0_ReKi - T )
-            !N(4)  = ( 1.0_ReKi - Z )*( 1.0_ReKi - Y )*( 1.0_ReKi - T )
-            !N(5)  = ( 1.0_ReKi + Z )*( 1.0_ReKi - Y )*( 1.0_ReKi + T )
-            !N(6)  = ( 1.0_ReKi + Z )*( 1.0_ReKi + Y )*( 1.0_ReKi + T )
-            !N(7)  = ( 1.0_ReKi - Z )*( 1.0_ReKi + Y )*( 1.0_ReKi + T )
-            !N(8)  = ( 1.0_ReKi - Z )*( 1.0_ReKi - Y )*( 1.0_ReKi + T )
-            !N     = N / REAL( SIZE(N), ReKi )  ! normalize
-            !
-            !
-            !u(1)  = ParamData%FFData(1, IZHI, IYLO, IDIM, ITLO )
-            !u(2)  = ParamData%FFData(1, IZHI, IYHI, IDIM, ITLO )
-            !u(3)  = ParamData%FFData(1, IZLO, IYHI, IDIM, ITLO )
-            !u(4)  = ParamData%FFData(1, IZLO, IYLO, IDIM, ITLO )
-            !u(5)  = ParamData%FFData(1, IZHI, IYLO, IDIM, ITHI )
-            !u(6)  = ParamData%FFData(1, IZHI, IYHI, IDIM, ITHI )
-            !u(7)  = ParamData%FFData(1, IZLO, IYHI, IDIM, ITHI )
-            !u(8)  = ParamData%FFData(1, IZLO, IYLO, IDIM, ITHI )
-            
-            !FF_Interp_evo(IDIM)  =  SUM ( N * u ) 
-            
-         
-             
             !the code below uses nearest point, this is used to avoid filtering effect due to interpolation
+             ITCL = MIN(ITCL,PARAMDATA%NFFSTEPS)
             FF_Interp_evo(IDIM)  = ParamData%FFData(IXCL, IZCL, IYCL, IDIM, ITCL )
             
+            ELSE
+              !New Algorithm here,   the code below uses 3d linear interpolation
+                N(1)  = ( 1.0_ReKi + Z )*( 1.0_ReKi - Y )*( 1.0_ReKi - T )
+                N(2)  = ( 1.0_ReKi + Z )*( 1.0_ReKi + Y )*( 1.0_ReKi - T )
+                N(3)  = ( 1.0_ReKi - Z )*( 1.0_ReKi + Y )*( 1.0_ReKi - T )
+                N(4)  = ( 1.0_ReKi - Z )*( 1.0_ReKi - Y )*( 1.0_ReKi - T )
+                N(5)  = ( 1.0_ReKi + Z )*( 1.0_ReKi - Y )*( 1.0_ReKi + T )
+                N(6)  = ( 1.0_ReKi + Z )*( 1.0_ReKi + Y )*( 1.0_ReKi + T )
+                N(7)  = ( 1.0_ReKi - Z )*( 1.0_ReKi + Y )*( 1.0_ReKi + T )
+                N(8)  = ( 1.0_ReKi - Z )*( 1.0_ReKi - Y )*( 1.0_ReKi + T )
+                N     = N / REAL( SIZE(N), ReKi )  ! normalize
             
+            
+                u(1)  = ParamData%FFData(IXCL, IZHI, IYLO, IDIM, ITLO )
+                u(2)  = ParamData%FFData(IXCL, IZHI, IYHI, IDIM, ITLO )
+                u(3)  = ParamData%FFData(IXCL, IZLO, IYHI, IDIM, ITLO )
+                u(4)  = ParamData%FFData(IXCL, IZLO, IYLO, IDIM, ITLO )
+                u(5)  = ParamData%FFData(IXCL, IZHI, IYLO, IDIM, ITHI )
+                u(6)  = ParamData%FFData(IXCL, IZHI, IYHI, IDIM, ITHI )
+                u(7)  = ParamData%FFData(IXCL, IZLO, IYHI, IDIM, ITHI )
+                u(8)  = ParamData%FFData(IXCL, IZLO, IYLO, IDIM, ITHI )
+            
+                FF_Interp_evo(IDIM)  =  SUM ( N * u  )
+             END IF
 
-
+            
          END DO !IDIM
 
       ELSE

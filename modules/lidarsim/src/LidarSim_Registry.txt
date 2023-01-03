@@ -62,6 +62,7 @@ typedef	 ^	        ^                       LOGICAL	 EvolutionFlag	   -	 -	   -	 
 typedef	 ^	        ^                       LOGICAL	 AvailabilityFlag  -	 -	   -	     "Flag whether measurement availability due to CNR considered"	-
 typedef	 ^	        ^                       LOGICAL	 BladeBlockageFlag -	 -	   -	     "Flag whether blade blockage considered"	-
 typedef	 ^	        ^                       LOGICAL	 SpinnerMountedFlag      -	 -	   -	       "Flag whether the lidar is Mounted on spinner"	-
+typedef	 ^	        ^                       LOGICAL	 NearestInterpFlag      -	 -	   -	       "Flag to use nearest interpolation"	-
 typedef  ^   		^	                    IntKi	 NBlade			   -	 -	   -	"Number of blades, needed for lidar beam blockage detection" -
 typedef  ^   		^	                    IntKi	 NELM			   -	 -	   -	"Number of blade element, needed for lidar beam blockage detection" -
 typedef	 ^			^                   	ReKi	 BladeELMCL		  {:} 	 -     -	"Chord length of blade element"	-
@@ -111,6 +112,8 @@ typedef ^		    LidarSim_InputFile CHARACTER(1024)	AvailabilityFilenameRoot			-	-
 typedef	^	        LidarSim_InputFile LOGICAL	BladeBlockageFlag			-	-	-	"Flag whether blade blockage is considered"	-
 ######################			Spinner Mounted	  ############################################
 typedef	^	        LidarSim_InputFile LOGICAL	SpinnerMountedFlag			-	-	-	"Flag whether rotational sampling is considered"	-
+######################			Nearest Interpolation	  ############################################
+typedef	 ^	        LidarSim_InputFile LOGICAL	 NearestInterpFlag      -	 -	   -	       "Flag to use nearest interpolation"	-
 ######################			Outlist						  ############################################
 typedef ^			LidarSim_InputFile CHARACTER(15)	OutList				{:}	-	-	"User requested Outlist"
 typedef ^			LidarSim_InputFile IntKi			NumOuts				-	-	-	"Number of output parameters"
