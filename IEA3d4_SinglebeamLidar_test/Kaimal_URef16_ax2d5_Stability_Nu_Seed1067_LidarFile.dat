@@ -8,7 +8,7 @@ False	Echo           					- Echo input data to <RootName>.ech (flag)
 1       WeightingType					- Switch : {0 = single point; 1 = gaussian distribution; 2 = manual distribution} [-]
 1		LidarPositionX_N				- Position of the lidar coordinate system in the Nacelle coordinate system (X coordinate) [m]
 0		LidarPositionY_N				- Position of the lidar coordinate system in the Nacelle coordinate system (Y coordinate) [m]
-3		LidarPositionZ_N				- Position of the lidar coordinate system in the Nacelle coordinate system (Z coordinate) [m]
+5		LidarPositionZ_N				- Position of the lidar coordinate system in the Nacelle coordinate system (Z coordinate) [m]
 0		RollAngle_N						- Roll angle between the Nacelle and the lidar coordinate system [deg]
 0		PitchAngle_N					- Pitch angle between the Nacelle and the lidar coordinate system [deg]
 180		YawAngle_N						- Yaw angle between the Nacelle and the lidar coordinate system [deg]
@@ -44,6 +44,10 @@ False		AvailabilityFlag                                                         
 "CNR\Spectral_dt_0d25_T_2048_Npos_4_CNRmean_0d5_Seed6895.dat"	    Lidar_aiailability_filenameRoot              - Rootname of the lidar availability time series data
 ---------------------- Blade Blockage--------------------
 True		BladeBlockageFlag                                                                          - Flag whether blade blockage considered
+---------------------- Spinner Mounted--------------------
+False		     SpinnerMountedFlag        	- Flag whether spinner-mounted considered
+---------------------- Nearest Interpolation ------------------------------------
+True        NearestInterpFlag           - Flag to use nearest interpolation. By default, linear interpolation is used 
 ---------------------- Output---------------------------------------------------
 OutList      							- The next line(s) contains a list of output parameters.  See OutListParameters.xlsx for a listing of available output channels, (-)
 "XLI"
