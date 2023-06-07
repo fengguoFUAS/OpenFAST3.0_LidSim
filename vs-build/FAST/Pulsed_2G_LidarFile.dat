@@ -12,7 +12,7 @@ False	Echo           					- Echo input data to <RootName>.ech (flag)
 0		RollAngle_N						- Roll angle between the Nacelle and the lidar coordinate system [deg]
 0		PitchAngle_N					- Pitch angle between the Nacelle and the lidar coordinate system [deg]
 180		YawAngle_N						- Yaw angle between the Nacelle and the lidar coordinate system [deg]
-18    	URef							- Mean u-component wind speed at the reference height [m/s]
+14    	URef							- Mean u-component wind speed at the reference height [m/s]
 2       GatesPerBeam					- Amount of range gates for each los
 0.0125	t_measurement_interval			- Time between each measurement [s]
 ---------------------- Measuring points in cartesian coordinates----------------
@@ -50,6 +50,7 @@ OutList      							- The next line(s) contains a list of output parameters.  Se
 "XLI"
 "XDTLI"
 "VLOS01LI"
+"VLOS02LI"
 "BLDBLOCKLI"
 "BEAMIDLI"
 "NEWDATALI"
