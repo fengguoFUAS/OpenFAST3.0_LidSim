@@ -67,6 +67,11 @@ typedef  ^   		^	                    IntKi	 NBlade			   -	 -	   -	"Number of bla
 typedef  ^   		^	                    IntKi	 NELM			   -	 -	   -	"Number of blade element, needed for lidar beam blockage detection" -
 typedef	 ^			^                   	ReKi	 BladeELMCL		  {:} 	 -     -	"Chord length of blade element"	-
 typedef  ^   		^	                    IntKi	 AeroynMode			   -	 -	   -	"Aerodyn mode, required to determine blade geometry for blockage detection, 14 or 15" -
+typedef  ^          ^                       LOGICAL  RotateWindBox     -  .FALSE.  -     "determines if wind will be rotated"              -
+typedef  ^          ^                       ReKi     RotToWind        {3}{3} -     -     "Rotation matrix for rotating from the global XYZ coordinate system to the wind coordinate system (wind along X')"   -
+typedef  ^          ^                       ReKi     RotFromWind      {3}{3} -     -     "Rotation matrix for rotating from the wind coordinate system (wind along X') back to the global XYZ coordinate system.  Equal to TRANSPOSE(RotToWind)"   -
+typedef  ^          ^                       ReKi     ReferenceHeight   -     -     -     "Height of the wind turbine"                             meters
+typedef  ^          ^                       ReKi     RefPosition       3     -     -     "Reference position (point where box is rotated)"        meters
 
  ..... LidarSim_InputType data .......................................................................................................
 typedef	LidarSim	LidarSim_InputType	MeshType	NacelleMotion			-	-	-	"."	-

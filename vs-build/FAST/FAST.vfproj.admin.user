@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VisualStudioUserFile ProjectCreator="Intel Fortran" Keyword="Console Application" Version="11.0" ProjectIdGuid="{18AE8067-CCC6-4479-A0DB-C4089EF9FE71}">
+	<Configurations>
+		<Configuration Name="Debug|Win32"/>
+		<Configuration Name="Release|Win32"/>
+		<Configuration Name="Debug|x64" CommandArguments="IEA-15-240-RWT-UMaineSemi.fst"/>
+		<Configuration Name="Release|x64" CommandArguments="IEA-15-240-RWT-UMaineSemi.fst"/>
+		<Configuration Name="Release_Double|Win32"/>
+		<Configuration Name="Release_Double|x64"/>
+		<Configuration Name="Debug_Double|Win32"/>
+		<Configuration Name="Debug_Double|x64"/></Configurations></VisualStudioUserFile>

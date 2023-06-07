@@ -107,6 +107,11 @@ IMPLICIT NONE
     INTEGER(IntKi)  :: NELM      !< Number of blade element, needed for lidar beam blockage detection [-]
     REAL(ReKi) , DIMENSION(:), ALLOCATABLE  :: BladeELMCL      !< Chord length of blade element [-]
     INTEGER(IntKi)  :: AeroynMode      !< Aerodyn mode, required to determine blade geometry for blockage detection, 14 or 15 [-]
+    LOGICAL  :: RotateWindBox = .FALSE.      !< determines if wind will be rotated [-]
+    REAL(ReKi) , DIMENSION(1:3,1:3)  :: RotToWind      !< Rotation matrix for rotating from the global XYZ coordinate system to the wind coordinate system (wind along X') [-]
+    REAL(ReKi) , DIMENSION(1:3,1:3)  :: RotFromWind      !< Rotation matrix for rotating from the wind coordinate system (wind along X') back to the global XYZ coordinate system.  Equal to TRANSPOSE(RotToWind) [-]
+    REAL(ReKi)  :: ReferenceHeight      !< Height of the wind turbine [meters]
+    REAL(ReKi) , DIMENSION(1:3)  :: RefPosition      !< Reference position (point where box is rotated) [meters]
   END TYPE LidarSim_ParameterType
 ! =======================
 ! =========  LidarSim_InputType  =======
@@ -1077,6 +1082,11 @@ IF (ALLOCATED(SrcParamData%BladeELMCL)) THEN
     DstParamData%BladeELMCL = SrcParamData%BladeELMCL
 ENDIF
     DstParamData%AeroynMode = SrcParamData%AeroynMode
+    DstParamData%RotateWindBox = SrcParamData%RotateWindBox
+    DstParamData%RotToWind = SrcParamData%RotToWind
+    DstParamData%RotFromWind = SrcParamData%RotFromWind
+    DstParamData%ReferenceHeight = SrcParamData%ReferenceHeight
+    DstParamData%RefPosition = SrcParamData%RefPosition
  END SUBROUTINE LidarSim_CopyParam
 
  SUBROUTINE LidarSim_DestroyParam( ParamData, ErrStat, ErrMsg )
@@ -1246,6 +1256,11 @@ ENDIF
       Re_BufSz   = Re_BufSz   + SIZE(InData%BladeELMCL)  ! BladeELMCL
   END IF
       Int_BufSz  = Int_BufSz  + 1  ! AeroynMode
+      Int_BufSz  = Int_BufSz  + 1  ! RotateWindBox
+      Re_BufSz   = Re_BufSz   + SIZE(InData%RotToWind)  ! RotToWind
+      Re_BufSz   = Re_BufSz   + SIZE(InData%RotFromWind)  ! RotFromWind
+      Re_BufSz   = Re_BufSz   + 1  ! ReferenceHeight
+      Re_BufSz   = Re_BufSz   + SIZE(InData%RefPosition)  ! RefPosition
   IF ( Re_BufSz  .GT. 0 ) THEN 
      ALLOCATE( ReKiBuf(  Re_BufSz  ), STAT=ErrStat2 )
      IF (ErrStat2 /= 0) THEN 
@@ -1550,6 +1565,26 @@ ENDIF
   END IF
     IntKiBuf(Int_Xferred) = InData%AeroynMode
     Int_Xferred = Int_Xferred + 1
+    IntKiBuf(Int_Xferred) = TRANSFER(InData%RotateWindBox, IntKiBuf(1))
+    Int_Xferred = Int_Xferred + 1
+    DO i2 = LBOUND(InData%RotToWind,2), UBOUND(InData%RotToWind,2)
+      DO i1 = LBOUND(InData%RotToWind,1), UBOUND(InData%RotToWind,1)
+        ReKiBuf(Re_Xferred) = InData%RotToWind(i1,i2)
+        Re_Xferred = Re_Xferred + 1
+      END DO
+    END DO
+    DO i2 = LBOUND(InData%RotFromWind,2), UBOUND(InData%RotFromWind,2)
+      DO i1 = LBOUND(InData%RotFromWind,1), UBOUND(InData%RotFromWind,1)
+        ReKiBuf(Re_Xferred) = InData%RotFromWind(i1,i2)
+        Re_Xferred = Re_Xferred + 1
+      END DO
+    END DO
+    ReKiBuf(Re_Xferred) = InData%ReferenceHeight
+    Re_Xferred = Re_Xferred + 1
+    DO i1 = LBOUND(InData%RefPosition,1), UBOUND(InData%RefPosition,1)
+      ReKiBuf(Re_Xferred) = InData%RefPosition(i1)
+      Re_Xferred = Re_Xferred + 1
+    END DO
  END SUBROUTINE LidarSim_PackParam
 
  SUBROUTINE LidarSim_UnPackParam( ReKiBuf, DbKiBuf, IntKiBuf, Outdata, ErrStat, ErrMsg )
@@ -1890,6 +1925,36 @@ ENDIF
   END IF
     OutData%AeroynMode = IntKiBuf(Int_Xferred)
     Int_Xferred = Int_Xferred + 1
+    OutData%RotateWindBox = TRANSFER(IntKiBuf(Int_Xferred), OutData%RotateWindBox)
+    Int_Xferred = Int_Xferred + 1
+    i1_l = LBOUND(OutData%RotToWind,1)
+    i1_u = UBOUND(OutData%RotToWind,1)
+    i2_l = LBOUND(OutData%RotToWind,2)
+    i2_u = UBOUND(OutData%RotToWind,2)
+    DO i2 = LBOUND(OutData%RotToWind,2), UBOUND(OutData%RotToWind,2)
+      DO i1 = LBOUND(OutData%RotToWind,1), UBOUND(OutData%RotToWind,1)
+        OutData%RotToWind(i1,i2) = ReKiBuf(Re_Xferred)
+        Re_Xferred = Re_Xferred + 1
+      END DO
+    END DO
+    i1_l = LBOUND(OutData%RotFromWind,1)
+    i1_u = UBOUND(OutData%RotFromWind,1)
+    i2_l = LBOUND(OutData%RotFromWind,2)
+    i2_u = UBOUND(OutData%RotFromWind,2)
+    DO i2 = LBOUND(OutData%RotFromWind,2), UBOUND(OutData%RotFromWind,2)
+      DO i1 = LBOUND(OutData%RotFromWind,1), UBOUND(OutData%RotFromWind,1)
+        OutData%RotFromWind(i1,i2) = ReKiBuf(Re_Xferred)
+        Re_Xferred = Re_Xferred + 1
+      END DO
+    END DO
+    OutData%ReferenceHeight = ReKiBuf(Re_Xferred)
+    Re_Xferred = Re_Xferred + 1
+    i1_l = LBOUND(OutData%RefPosition,1)
+    i1_u = UBOUND(OutData%RefPosition,1)
+    DO i1 = LBOUND(OutData%RefPosition,1), UBOUND(OutData%RefPosition,1)
+      OutData%RefPosition(i1) = ReKiBuf(Re_Xferred)
+      Re_Xferred = Re_Xferred + 1
+    END DO
  END SUBROUTINE LidarSim_UnPackParam
 
  SUBROUTINE LidarSim_CopyInput( SrcInputData, DstInputData, CtrlCode, ErrStat, ErrMsg )

@@ -3,7 +3,7 @@
     USE LidarSim_Types
     USE NWTC_Library
     !USE InflowWind_Subs
-    USE InflowWind_Types   !needed to deliver the flow field from InflowWind module during initialization, only in the frozen case 
+    USE InflowWind_Types   !needed to deliver the flow field from InflowWind module during initialization, only in the frozen turbulence case 
     !USE IfW_BladedFFWind
     !USE AeroDyn14_Types
     
@@ -2725,21 +2725,11 @@ END  SUBROUTINE LidarSim_InitializeAvailability
     REAL(DbKi),                             INTENT(IN   )   ::  Time                        !< Current simulation time in seconds
     
     
-    !IfW Parameter
-    !TYPE(InflowWind_ParameterType),         INTENT(IN   )   ::  IfW_p                       !< Parameters
-    !TYPE(InflowWind_ContinuousStateType),   INTENT(IN   )   ::  IfW_ContStates              !< Continuous states at Time
-    !TYPE(InflowWind_DiscreteStateType),     INTENT(IN   )   ::  IfW_DiscStates              !< Discrete states at Time
-    !TYPE(InflowWind_ConstraintStateType),   INTENT(IN   )   ::  IfW_ConstrStates            !< Constraint states at Time
-    !TYPE(InflowWind_OtherStateType),        INTENT(IN   )   ::  IfW_OtherStates             !< Other/optimization states at Time
-    !TYPE(InflowWind_MiscVarType),           INTENT(INOUT)   ::  IfW_m                       !< Misc variables for optimization (not copied in glue code)
-    
     !Error Variables
     INTEGER(IntKi),                         INTENT(  OUT)   ::  ErrStat                     !< Error status of the operation
     CHARACTER(*),                           INTENT(  OUT)   ::  ErrMsg                      !< Error message if ErrStat /= ErrID_None
     
     !Local Variables
-    !TYPE(InflowWind_InputType)              ::  InputForCalculation                         ! input data field for the calculation in the InflowWind module
-    !TYPE(InflowWind_OutputType)             ::  OutputForCalculation                        ! data field were the calculated speed is written from the InflowWind module
     INTEGER(IntKi)                          ::  Counter                                     ! Counter for the loop for the different weightings of the point
     REAL(ReKi),DIMENSION(:), ALLOCATABLE    ::  Vlos_tmp                                    !< Array with all temporary Vlos
     REAL(ReKi)                              ::  PositionXYZ(3,1)                                    !< Array with all temporary Vlos
@@ -2761,22 +2751,40 @@ END  SUBROUTINE LidarSim_InitializeAvailability
     CALL AllocAry(Vlos_tmp ,SIZE(p%Weighting), 'Vlos_tmp%VelocityUVW',ErrStat2, ErrMsg2)                            !Allocating space for temporary windspeeds
     CALL SetErrStat(ErrStat2, ErrMsg2, ErrStat, ErrMsg, RoutineName )
      
-    IF( P%WINDFILEFORMAT == 1 .OR. P%WINDFILEFORMAT == 2)Then !Uniform Wind 2 (und steady 1)
-        MeasuringPosition_I(1) = MeasuringPosition_I(1)-LidarPosition_I(1)  !In the uniform wind case. the wind hits the turbine at the same time indepentend of the x shift
-        DO Counter = 1, SIZE(p%Weighting)
-            PositionXYZ(:,1) = MeasuringPosition_I + p%WeightingDistance(Counter) * UnitVector_I                                                    !position of the weighted measuring point
-            !CALL  LidarSim_CalculateUVW(Time+DBLE(-PositionXYZ(1,1)/p%Uref),PositionXYZ, p, VelocityUVW, ErrStat2, ErrMsg2 )     !Calculation of the windspeed   still need to be updated
-            !Vlos_tmp(Counter) = - DOT_PRODUCT(VelocityUVW(:,1),UnitVector_I)
-            Vlos_tmp(Counter) = 10
-        END DO
-    ELSE IF(P%WINDFILEFORMAT ==  3 .OR. P%WINDFILEFORMAT == 4) THEN        !Bladed Turublent 4 ( und TurbSim 3)
+    !IF( P%WINDFILEFORMAT == 1 .OR. P%WINDFILEFORMAT == 2)Then !Uniform Wind 2 (und steady 1)
+    !    MeasuringPosition_I(1) = MeasuringPosition_I(1)-LidarPosition_I(1)  !In the uniform wind case. the wind hits the turbine at the same time indepentend of the x shift
+    !    DO Counter = 1, SIZE(p%Weighting)
+    !        PositionXYZ(:,1) = MeasuringPosition_I + p%WeightingDistance(Counter) * UnitVector_I                                                    !position of the weighted measuring point
+    !        !CALL  LidarSim_CalculateUVW(Time+DBLE(-PositionXYZ(1,1)/p%Uref),PositionXYZ, p, VelocityUVW, ErrStat2, ErrMsg2 )     !Calculation of the windspeed   still need to be updated
+    !        !Vlos_tmp(Counter) = - DOT_PRODUCT(VelocityUVW(:,1),UnitVector_I)
+    !        Vlos_tmp(Counter) = 10
+    !    END DO
+    !ELSE
+    IF(P%WINDFILEFORMAT == 4) THEN        !Bladed Turublent 4 ( und TurbSim 3)
         DO Counter = 1, SIZE(p%Weighting)
             
+
             PositionXYZ(:,1) = MeasuringPosition_I + p%WeightingDistance(Counter) * UnitVector_I   
             !position of the weighted measuring point
+            
+            ! Apply the coordinate transformation to the PositionXYZ coordinates to get the PositionXYZprime coordinate list
+            ! If the PropagationDir is zero, we don't need to apply this and will simply copy the data.  Repeat for the WindViXYZ.
+            IF ( p%RotateWindBox ) THEN
+                    ! NOTE: rotations are about the hub at [ 0 0 H ].  See InflowWind_SetParameters for details.
+                PositionXYZ(:,1)   =  MATMUL( p%RotToWind, (PositionXYZ(:,1) - p%RefPosition) ) + p%RefPosition
+            ENDIF
+            
            
             CALL LidarSim_CalculateUVW(Time,PositionXYZ, p, VelocityUVW, ErrStat2, ErrMsg2 ) 
+            
+            
+            IF ( p%RotateWindBox ) THEN            ! rotate from wind field local coordinate to inertial coordinate
+                VelocityUVW(:,1)   =  MATMUL( p%RotFromWind, VelocityUVW(:,1) )        
+            ENDIF
+            
             Vlos_tmp(Counter) = - DOT_PRODUCT(VelocityUVW(:,1),UnitVector_I)
+            
+
         END DO
         
     ELSE

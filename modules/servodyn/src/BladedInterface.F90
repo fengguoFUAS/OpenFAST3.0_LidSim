@@ -805,8 +805,14 @@ END IF
    dll_data%avrSWAP(50) = LEN_TRIM(dll_data%DLL_InFile) +1  !> * Record 50: Number of characters in the "INFILE"  argument (-) [trimmed length of DLL_InFile parameter plus 1 (we add one for the C NULL CHARACTER)]
    dll_data%avrSWAP(51) = LEN_TRIM(dll_data%RootName)   +1  !> * Record 51: Number of characters in the "OUTNAME" argument (-) [trimmed length of RootName parameter plus 1 (we add one for the C NULL CHARACTER)]
 ! Record 52 is reserved for future use                      ! DLL interface version number (-)
-   dll_data%avrSWAP(53) = u%YawBrTAxp                       !> * Record 53: Tower top fore-aft     acceleration (m/s^2) [SrvD input]
-   dll_data%avrSWAP(54) = u%YawBrTAyp                       !> * Record 54: Tower top side-to-side acceleration (m/s^2) [SrvD input]
+   !dll_data%avrSWAP(53) = u%YawBrTAxp                       !> * Record 53: Tower top fore-aft     acceleration (m/s^2) [SrvD input]
+   !dll_data%avrSWAP(54) = u%YawBrTAyp                       !> * Record 54: Tower top side-to-side acceleration (m/s^2) [SrvD input]
+   
+   dll_data%avrSWAP(53) = u%YawBrTAxp*cos(u%YawAngle)+u%YawBrTAyp*sin(u%YawAngle)                       !> * Record 53: Tower top fore-aft     acceleration (m/s^2) [SrvD input]
+   dll_data%avrSWAP(54) = -u%YawBrTAxp*sin(u%YawAngle)+u%YawBrTAyp*cos(u%YawAngle)                        !> * Record 54: Tower top side-to-side acceleration (m/s^2) [SrvD input]
+   
+   
+   
 ! Records 55-59 are outputs [see Retrieve_avrSWAP()]
    dll_data%avrSWAP(60) = u%LSSTipPxa                       !> * Record 60: Rotor azimuth angle (rad) [SrvD input]
    dll_data%avrSWAP(61) = p%NumBl                           !> * Record 61: Number of blades (-) [SrvD NumBl parameter]

@@ -142,7 +142,14 @@
     p%MeasurementTimeStep    = 0                                                                ! First time step of lidar measurement
     
     
-    
+    ! get inflow propogation direction from inflow module
+    p%RotateWindBox          =  IFW_P%ROTATEWINDBOX	
+    P%ROTTOWIND	             =  IFW_P%ROTTOWIND	 
+    P%ROTFROMWIND	         =  IFW_P%ROTFROMWIND
+    P%REFPOSITION	         =  IFW_P%REFPOSITION
+
+
+
     CALL LidarSim_DestroyInputFile(InputFileData, ErrStat, ErrMsg)                             	! Calls to destory the data from the inputfile. Important data has to be transfered to the parameter data before
 
     ErrStat = 		TMPERRSTAT
@@ -160,25 +167,13 @@
     REAL(DbKi),                                 INTENT(IN   )       ::  Time                !< Current simulation time in seconds
     TYPE(LidarSim_ParameterType),              	INTENT(INOUT)       ::  p
     TYPE(LidarSim_OutputType),                 	INTENT(INOUT)       ::  y                   !< Outputs computed at Time (IN for mesh reasons and data allocation)
-    TYPE(LidarSim_InputType),                  	INTENT(IN   )       ::  u                   !< Inputs from other Modules (e.g. ElastoDyn)
-    
-    !Data for CalcOutput of IfW_Subs and Blockage
-    !TYPE(InflowWind_ParameterType),             INTENT(IN   )       ::  IfW_p                       !< Parameters
-    !TYPE(AD14_InputType),                       INTENT(IN   )       ::  AD14_u                      ! Inputs from aerodynamic module
-    !TYPE(AD14_ParameterType),                   INTENT(IN   )       ::  AD14_p                      ! Parameters from aerodynamic module
-    !TYPE(InflowWind_ContinuousStateType),       INTENT(IN   )       ::  IfW_ContStates              !< Continuous states at Time
-    !TYPE(InflowWind_DiscreteStateType),         INTENT(IN   )       ::  IfW_DiscStates              !< Discrete states at Time
-    !TYPE(InflowWind_ConstraintStateType),       INTENT(IN   )       ::  IfW_ConstrStates            !< Constraint states at Time
-    !TYPE(InflowWind_OtherStateType),            INTENT(IN   )       ::  IfW_OtherStates             !< Other/optimization states at Time
-    !TYPE(InflowWind_MiscVarType),               INTENT(INOUT)       ::  IfW_m                       !< Misc variables for optimization (not copied in glue code)    
+    TYPE(LidarSim_InputType),                  	INTENT(IN   )       ::  u                   !< Inputs from other Modules (e.g. ElastoDyn)  
     INTEGER(IntKi),                             INTENT(  OUT)       ::  ErrStat                     !< Error status of the operation
     CHARACTER(*),                               INTENT(  OUT)       ::  ErrMsg                      !< Error message if ErrStat /= ErrID_None
     
     
     
     !Local Variables
-    !TYPE(InflowWind_InputType)                                      ::  InputForCalculation         !Data Field needed for the calculation of the windspeed
-    !TYPE(InflowWind_OutputType)                                     ::  OutputForCalculation        !datafield in which the calculated speed is stored
     REAL(ReKi)                                                      ::  UnitVector(3)               !Line of Sight Unit Vector
     REAL(ReKi)                                                      ::  MeasuringPosition_I(3)      !Transformed Measuring Position
     REAL(ReKi)                                                      ::  LidarPosition_I(3)          !Transformed Lidar Position
@@ -223,7 +218,7 @@
                  CALL LidarSim_CheckBladeBlockage_14(p,y,u,LidarPosition_I,MeasuringPosition_I,BladeBlockageStatus)  ! check blockage with AD14
                 ELSEIF  (P%AeroynMode == 15) THEN
                  CALL LidarSim_CheckBladeBlockage_15(p,y,u,LidarPosition_I,MeasuringPosition_I,BladeBlockageStatus)  ! check blockage with AD15
-                 !BladeBlockageStatus = 10
+                 
                 END IF
             ELSE
                 !BladeBlockageStatus = 0 ! it is always 0 if we do not consider
